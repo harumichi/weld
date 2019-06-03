@@ -44,6 +44,13 @@ class HelloWeldVector(object):
             self.weldobj.weld_code, str(number))
         return self
 
+    def exp(self):
+        self.cached = None
+        template = "map({0}, |e| exp(e))"
+        self.weldobj.weld_code = template.format(
+            self.weldobj.weld_code)
+        return self
+
     def subtract(self, number):
         self.cached = None
         template = "map({0}, |e| e - {1})"
