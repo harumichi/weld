@@ -169,11 +169,18 @@ impl NumericExpressionGen for LlvmGenerator {
             // Use the LLVM intrinsic if one is available, since LLVM may be able to vectorize it.
             // Otherwise, fall back to the libc math variant and unroll SIMD values manually.
             let result = if let Some(name) = op.llvm_intrinsic() {
-                let name = Intrinsics::llvm_numeric(name, kind, simd);
+                let supported = Intrinsics::external_math_support(op, kind, simd);
+                let numeric;
+                if supported {
+                    numeric = Intrinsics::external_math_numeric(op, kind, simd);
+                    self.inlined_external.insert(CString::new(numeric.clone()).unwrap());
+                } else {
+                    numeric = Intrinsics::llvm_numeric(name, kind, simd);
+                }
                 let ret_ty = LLVMTypeOf(child);
                 let mut arg_tys = [ret_ty];
-                self.intrinsics.add(&name, ret_ty, &mut arg_tys);
-                self.intrinsics.call(ctx.builder, name, &mut [child])?
+                self.intrinsics.add(&numeric, ret_ty, &mut arg_tys);
+                self.intrinsics.call(ctx.builder, numeric, &mut [child])?
             } else {
                 use crate::ast::ScalarKind::{F32, F64};
                 use crate::ast::UnaryOpKind::*;
