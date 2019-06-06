@@ -44,6 +44,17 @@ fn build_llvmext(project_dir: &str) {
     println!("cargo:rustc-link-search=native={}", out_dir);
 }
 
+// Build the simd math library
+fn confirm_sleef_built(project_dir: &str) {
+    use std::path::Path;
+    let tmp = format!("{}/sleef/sleef/build/lib", project_dir);
+    let bitcode_dir = Path::new(&tmp);
+
+    if !bitcode_dir.exists() {
+        panic!("download and build sleef.");
+    }    
+}
+
 fn main() {
     let ref project_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
@@ -55,4 +66,7 @@ fn main() {
 
     // Build and link external libs.
     build_llvmext(project_dir);
+
+    // check sleef is built
+    confirm_sleef_built(project_dir);
 }
