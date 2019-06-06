@@ -58,6 +58,7 @@ use std::fmt;
 use std::mem;
 
 use fnv::FnvHashMap;
+use fnv::FnvHashSet;
 use libc::{c_char, c_uint, c_ulonglong};
 
 use crate::conf::ParsedConf;
@@ -102,6 +103,7 @@ mod numeric;
 mod serde;
 mod target;
 mod vector;
+mod external;
 
 use self::builder::appender;
 use self::builder::merger;
@@ -323,6 +325,8 @@ pub struct LlvmGenerator {
     struct_names: FnvHashMap<Type, CString>,
     /// Counter for unique struct names.
     struct_index: u32,
+    /// inlined functions included in external module
+    inlined_external: FnvHashSet<CString>,
 }
 
 /// Defines helper methods for LLVM code generation.
@@ -761,6 +765,7 @@ impl LlvmGenerator {
             struct_names: FnvHashMap::default(),
             struct_index: 0,
             intrinsics,
+            inlined_external: FnvHashSet::default(),
         })
     }
 
