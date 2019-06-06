@@ -37,6 +37,9 @@ class HelloWeldVector(object):
     def __iadd__(self, other):
         return self.add(other)
 
+    def __isub__(self, other):
+        return self.subtract(other)
+
     def multiply(self, number):
         self.cached = None
         template = "map({0}, |e| e * {1})"
