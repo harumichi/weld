@@ -166,21 +166,32 @@ impl NumericExpressionGen for LlvmGenerator {
             };
             let child = self.load(ctx.builder, ctx.get_value(child)?)?;
 
+            // TODO: filter op which is supported with sleef
+            use super::external::sleef;
+            let simd_width = match simd {
+                true => Some(LLVM_VECTOR_WIDTH),
+                false => None,
+            };
+            if sleef::support_op(op, kind, simd_width) {
+                let name = sleef::func_name(op, kind, simd_width).unwrap();
+                let ret_ty = LLVMTypeOf(child);
+                let mut arg_tys = [ret_ty];
+                self.intrinsics.add(&name, ret_ty, &mut arg_tys);
+                let result= self.intrinsics.call(ctx.builder, name, &mut [child])?;
+
+                let output = ctx.get_value(statement.output.as_ref().unwrap())?;
+                LLVMBuildStore(ctx.builder, result, output);
+                return Ok(());
+            }
+
             // Use the LLVM intrinsic if one is available, since LLVM may be able to vectorize it.
             // Otherwise, fall back to the libc math variant and unroll SIMD values manually.
             let result = if let Some(name) = op.llvm_intrinsic() {
-                let supported = Intrinsics::external_math_support(op, kind, simd);
-                let numeric;
-                if supported {
-                    numeric = Intrinsics::external_math_numeric(op, kind, simd);
-                    self.inlined_external.insert(CString::new(numeric.clone()).unwrap());
-                } else {
-                    numeric = Intrinsics::llvm_numeric(name, kind, simd);
-                }
+                let name = Intrinsics::llvm_numeric(name, kind, simd);
                 let ret_ty = LLVMTypeOf(child);
                 let mut arg_tys = [ret_ty];
-                self.intrinsics.add(&numeric, ret_ty, &mut arg_tys);
-                self.intrinsics.call(ctx.builder, numeric, &mut [child])?
+                self.intrinsics.add(&name, ret_ty, &mut arg_tys);
+                self.intrinsics.call(ctx.builder, name, &mut [child])?
             } else {
                 use crate::ast::ScalarKind::{F32, F64};
                 use crate::ast::UnaryOpKind::*;

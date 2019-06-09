@@ -127,6 +127,10 @@ pub unsafe fn compile(
     conf: &ParsedConf,
     stats: &mut CompilationStats,
 ) -> WeldResult<CompiledModule> {
+    // link module
+    use super::external::sleef;
+    let module = sleef::link_sleef_module(module)?;
+
     init();
 
     let start = PreciseTime::now();
