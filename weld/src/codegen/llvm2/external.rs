@@ -165,9 +165,9 @@ pub mod sleef {
         pub static ref SLEEF_BITCODES: Vec<String> = {
             let mut s = Vec::new();
 
-            s.push("weldsimddp_AVX.bc");
             s.push("weldsimdsp_AVX2128.bc");
-//            s.push("weldsimddp_FMA4.bc");
+//            s.push("weldsimddp_AVX.bc");
+            s.push("weldsimddp_FMA4.bc");
             s.push("rempitab.bc");
 
             let mut sb = Vec::new();
@@ -206,8 +206,8 @@ pub mod sleef {
         name.push_str(&format!("{}", info[1]));
         name.push_str(match scalar {
             F32 => "avx2128",
-            F64 => "avx",
-//            F64 => "fma4",
+//            F64 => "avx",
+            F64 => "fma4",
             _ => { unreachable!(); }
         });
 
