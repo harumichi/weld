@@ -114,6 +114,14 @@ pub mod sleef {
             hm.insert(Sqrt, ["sqrt", "u05"]);
             hm.insert(Sin, ["sin", "u10"]);
             hm.insert(Cos, ["cos", "u10"]);
+            hm.insert(Tan, ["tan", "u10"]);
+            hm.insert(ASin, ["asin", "u10"]);
+            hm.insert(ACos, ["acos", "u10"]);
+            hm.insert(ATan, ["atan", "u10"]);
+            hm.insert(Sinh, ["sinh", "u10"]);
+            hm.insert(Cosh, ["cosh", "u10"]);
+            hm.insert(Tanh, ["tanh", "u10"]);
+            hm.insert(Erf, ["erf", "u10"]);
             hm
         };
 
@@ -132,8 +140,10 @@ pub mod sleef {
         pub static ref SLEEF_BITCODES: Vec<String> = {
             let mut s = Vec::new();
 
-            s.push("sleefsimddp_AVX.bc");
-            s.push("sleefsimdsp_AVX2128.bc");
+            s.push("weldsimddp_AVX.bc");
+            s.push("weldsimdsp_AVX2128.bc");
+//            s.push("weldsimddp_FMA4.bc");
+            s.push("rempitab.bc");
 
             let mut sb = Vec::new();
             for name in s.into_iter() {
@@ -170,8 +180,9 @@ pub mod sleef {
         name.push_str(&format!("{}_", simd_width.unwrap()));
         name.push_str(&format!("{}", info[1]));
         name.push_str(match scalar {
-            F32 => "avx",
-            F64 => "avx2128",
+            F32 => "avx2128",
+            F64 => "avx",
+//            F64 => "fma4",
             _ => { unreachable!(); }
         });
 
