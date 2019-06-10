@@ -22,7 +22,7 @@ use crate::codegen::llvm2::llvm_exts::*;
 
 /// Link modules loaded from bitcodes into a module in first argument.
 pub unsafe fn link_module_from_bitcode(
-    dst_module: LLVMModuleRef, src_bitcodes: Vec<String>
+    dst_module: LLVMModuleRef, src_bitcodes: &Vec<String>
 ) -> WeldResult<LLVMModuleRef> {
     // TODO: dispose intermediate object when error
     let mut modules = vec![dst_module];
@@ -31,7 +31,7 @@ pub unsafe fn link_module_from_bitcode(
         let mut membuf = 0 as LLVMMemoryBufferRef;
         let mut msg = 0 as *mut c_char;
 
-        let path = CString::new(bc).unwrap();
+        let path = CString::new(bc.clone()).unwrap();
         let ret = LLVMCreateMemoryBufferWithContentsOfFile(
             path.as_ptr(), &mut membuf as *mut LLVMMemoryBufferRef, &mut msg as *mut *mut c_char
         );
@@ -42,9 +42,6 @@ pub unsafe fn link_module_from_bitcode(
         }
 
         let mut module = 0 as LLVMModuleRef;
-//        let ret = LLVMParseBitcode2(
-//            membuf, &mut module as *mut LLVMModuleRef
-//        );
         let ret = LLVMParseBitcodeInContext2(
             context, membuf, &mut module as *mut LLVMModuleRef
         );
@@ -78,17 +75,17 @@ pub unsafe fn link_module(mut modules: Vec<LLVMModuleRef>) -> WeldResult<LLVMMod
 }
 
 pub unsafe fn add_inline_attr_in(
-    context: LLVMContextRef, module: LLVMModuleRef, funcnames: Vec<String>
-) -> WeldResult<LLVMModuleRef> {
+    context: LLVMContextRef, module: LLVMModuleRef, funcnames: &Vec<String>
+) -> WeldResult<()> {
     let attr = [LLVMExtAttribute::AlwaysInline];
 
     for name in funcnames {
-        let c_name = CString::new(name).unwrap();
+        let c_name = CString::new(name.clone()).unwrap();
         let function = LLVMGetNamedFunction(module, c_name.as_ptr());
         // TODO: handle err in case function is not found
         LLVMExtAddAttrsOnFunction(context, function, &attr);
     }
-    Ok(module)
+    Ok(())
 }
 
 
@@ -97,6 +94,7 @@ pub mod sleef {
     use llvm_sys::core::*;
 
     use super::*;
+    use super::super::*;
 
     use crate::ast::ScalarKind::{self, F32, F64};
     use crate::ast::UnaryOpKind::{self, *};
@@ -193,11 +191,11 @@ pub mod sleef {
 
     pub unsafe fn link_sleef_module(module: LLVMModuleRef)
         -> WeldResult<LLVMModuleRef> {
-        return link_module_from_bitcode(module, (*SLEEF_BITCODES).clone());
+        return link_module_from_bitcode(module, &(*SLEEF_BITCODES));
     }
 
-    pub unsafe fn add_inline_for_called(context: LLVMContextRef, module: LLVMModuleRef)
-        -> WeldResult<LLVMModuleRef> {
+    pub unsafe fn inline_function(context: LLVMContextRef, module: LLVMModuleRef)
+                                  -> WeldResult<()> {
         let mut funcs = Vec::new();
         for func in SLEEF_CALLED_FUNCS.lock().unwrap().iter() {
             funcs.push((*func).clone());
