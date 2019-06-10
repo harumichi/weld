@@ -88,6 +88,17 @@ pub unsafe fn add_inline_attr_in(
     Ok(())
 }
 
+pub unsafe fn set_private_linkage_in(
+    context: LLVMContextRef, module: LLVMModuleRef, funcnames: &Vec<String>
+) -> WeldResult<()> {
+    for name in funcnames {
+        let c_name = CString::new(name.clone()).unwrap();
+        let function = LLVMGetNamedFunction(module, c_name.as_ptr());
+        // TODO: handle err in case function is not found
+        LLVMSetLinkage(function, LLVMLinkage::LLVMPrivateLinkage);
+    }
+    Ok(())
+}
 
 pub mod sleef {
     use std::sync::Mutex;
@@ -125,6 +136,24 @@ pub mod sleef {
 
         pub static ref SLEEF_CALLED_FUNCS: Mutex<HashSet<String>> = {
             Mutex::new(HashSet::new())
+        };
+
+        pub static ref SLEEF_ALL_FUNCS: Vec<String> = {
+            let mut af = Vec::new();
+            let scalars = vec![ScalarKind::F32, ScalarKind::F64];
+            let widths = vec![LLVM_VECTOR_WIDTH];
+
+            for op in SLEEF_FUNC_INFOS.keys() {
+                for scalar in scalars.iter() {
+                    for width in widths.iter() {
+                        let fn_name = func_name(
+                            op.clone(), scalar.clone(), Some(width.clone())
+                        ).unwrap();
+                        af.push(fn_name);
+                    }
+                }
+            }
+            af
         };
 
         pub static ref SLEEF_BITCODE_DIR: String = {
@@ -197,14 +226,13 @@ pub mod sleef {
     pub unsafe fn inline_function(context: LLVMContextRef, module: LLVMModuleRef)
                                   -> WeldResult<()> {
         let mut funcs = Vec::new();
-        for func in SLEEF_CALLED_FUNCS.lock().unwrap().iter() {
+        for func in SLEEF_ALL_FUNCS.iter() {
+            debug!("inlined: {} ", func);
             funcs.push((*func).clone());
         }
-        return add_inline_attr_in(context, module, funcs);
+        add_inline_attr_in(context, module, &funcs)?;
+        set_private_linkage_in(context, module, &funcs)?;
+        Ok(())
     }
 
 }
-
-
-
-

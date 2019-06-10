@@ -130,6 +130,7 @@ pub unsafe fn compile(
     // link module
     use super::external::sleef;
     let module = sleef::link_sleef_module(module)?;
+    sleef::inline_function(context, module)?;
 
     init();
 
