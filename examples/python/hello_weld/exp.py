@@ -10,7 +10,9 @@ import time
 size = (1 << 26)
 print("size: {} MB".format(size >> 20))
 
-a_orig = np.array(np.random.rand((size)), dtype="float32")
+
+dtype="float64"
+a_orig = np.array(np.random.rand((size)), dtype=dtype)
 
 weld.weld_set_log_level(weld.WeldLogLevelDebug)
 
@@ -18,7 +20,12 @@ print "Running Weld..."
 start = time.time()
 a = HelloWeldVector(a_orig)
 a = a.exp()
-res = a.weldobj.evaluate(WeldVec(WeldFloat()), verbose=True)
+if dtype == "float32":
+    res = a.weldobj.evaluate(WeldVec(WeldFloat()), verbose=True)
+elif dtype == "float64":
+    res = a.weldobj.evaluate(WeldVec(WeldDouble()), verbose=True)
+else:
+    raise Exception()
 end = time.time()
 print "Weld result:", res
 weld_time = (end - start)
