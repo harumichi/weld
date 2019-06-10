@@ -26,3 +26,6 @@ for llfile in `ls *.ll`
 do 
     `llvm-config --bindir`/llvm-as $llfile
 done
+
+# extract function used in wedl from generated bitcode
+python extract_function.py
