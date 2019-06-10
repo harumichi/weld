@@ -14,7 +14,7 @@ use fnv::FnvHashMap;
 
 use libc::c_char;
 
-use crate::ast::{ScalarKind, UnaryOpKind};
+use crate::ast::ScalarKind;
 use crate::error::*;
 
 use std::ffi::CString;
@@ -115,64 +115,6 @@ impl Intrinsics {
             F32 => "f32",
             F64 => "f64",
         });
-        result
-    }
-
-    /// Given name and kind, return whether the math funcion is included in external module.
-    pub fn external_math_support(op: UnaryOpKind, kind: ScalarKind, simd: bool) -> bool {
-        use crate::ast::ScalarKind::*;
-        use crate::ast::UnaryOpKind::*;
-
-        simd && match op {
-            Exp | Log | Sqrt | Sin | Cos => true,
-            _ => false,
-        } && match kind {
-            F32 | F64 => true,
-            _ => false,
-        }
-    }
-
-    /// Returns a string name of sleef function
-    pub fn external_math_numeric(op: UnaryOpKind, kind: ScalarKind, simd: bool) -> String {
-        // use sleef math library
-        use crate::ast::ScalarKind::*;
-        use crate::ast::UnaryOpKind::*;
-
-        let mut result = format!("Sleef_{}", match op {
-            Exp => "exp",
-            Log => "log",
-            Sqrt => "sqrt",
-            Sin => "sin",
-            Cos => "cos",
-            _ => { unreachable!(); },
-        });
-        result.push_str(match kind {
-            F32 => "f",
-            F64 => "d",
-            _ => { unreachable!(); }
-        });
-
-        if simd {
-            result.push_str(&format!("{}_", LLVM_VECTOR_WIDTH));
-        } else {
-            unreachable!();
-        }
-
-        result.push_str(match op {
-            Exp => "u10",
-            Log => "u10",
-            Sqrt => "u05",
-            Sin => "u10",
-            Cos => "u10",
-            _ => { unreachable!(); },
-        });
-
-        result.push_str(match kind {
-            F32 => "avx2128",
-            F64 => "avx",
-            _ => { unreachable!(); }
-        });
-
         result
     }
 

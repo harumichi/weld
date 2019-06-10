@@ -109,8 +109,6 @@ pub mod sleef {
 
     use crate::ast::ScalarKind::{self, F32, F64};
     use crate::ast::UnaryOpKind::{self, *};
-    use crate::ast::Type::{Scalar, Simd};
-    use crate::sir::StatementKind::UnaryOp;
     use crate::error::WeldResult;
 
 
