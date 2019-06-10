@@ -7,11 +7,12 @@ import weld.bindings as weld
 import time
 
 # Input data size
-size = (2 << 20)
+size = (1 << 26)
+print("size: {} MB".format(size >> 20))
 
 a_orig = np.array(np.random.rand((size)), dtype="float32")
 
-#weld.weld_set_log_level(weld.WeldLogLevelTrace)
+weld.weld_set_log_level(weld.WeldLogLevelDebug)
 
 print "Running Weld..."
 start = time.time()
