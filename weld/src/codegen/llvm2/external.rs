@@ -132,9 +132,9 @@ pub mod sleef {
             hm
         };
 
-        pub static ref SLEEF_CALLED_FUNCS: Mutex<HashSet<String>> = {
-            Mutex::new(HashSet::new())
-        };
+//        pub static ref SLEEF_CALLED_FUNCS: Mutex<HashSet<String>> = {
+//            Mutex::new(HashSet::new())
+//        };
 
         pub static ref SLEEF_ALL_FUNCS: Vec<String> = {
             let mut af = Vec::new();
@@ -210,8 +210,6 @@ pub mod sleef {
 //            F64 => "fma4",
             _ => { unreachable!(); }
         });
-
-        SLEEF_CALLED_FUNCS.lock().unwrap().insert(name.clone());
 
         Ok(name)
     }
