@@ -16,7 +16,12 @@ fi
 cd sleef
 mkdir -p build
 cd build
-cmake -DSLEEF_ENABLE_LLVM_BITCODE=1 \
+
+CMAKE=cmake
+if type cmake3  >/dev/null 2>&1; then
+    CMAKE=cmake3
+fi
+$CMAKE -DSLEEF_ENABLE_LLVM_BITCODE=1 \
       -DCLANG_EXE_PATH=$CLANG ..
 make -j8 llvm-bitcode
 
