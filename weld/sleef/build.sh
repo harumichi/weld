@@ -13,6 +13,7 @@ if ! type $CLANG > /dev/null 2>&1 ; then
 fi
 
 # cmake
+sleef_root=$(cd $(dirname $0); pwd)
 cd sleef
 mkdir -p build
 cd build
@@ -33,4 +34,4 @@ do
 done
 
 # extract function used in wedl from generated bitcode
-python extract_function.py
+python $sleef_root/extract_function.py
