@@ -5,7 +5,7 @@ from distutils.version import StrictVersion
 assert StrictVersion(np.__version__) >= StrictVersion('1.13')
 
 ALL_PASSES = ["loop-fusion", "infer-size", "short-circuit-booleans",
-        "predicate", "inline-literals", "vectorize", "fix-iterate"]
+        "predicate", "inline-literals", "vectorize"]
 CUR_PASSES = ALL_PASSES
 offload_setitem = True
 MAX_REGISTERED_OPS = 100
