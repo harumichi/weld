@@ -156,10 +156,17 @@ pub mod sleef {
 
         pub static ref SLEEF_BITCODE_DIR: String = {
             use std::env;
-            format!(
+            use std::path::Path;
+
+            let weld_home = env::var("WELD_HOME").expect("WELD_HOME is not set");
+            let path = format!(
                 "{}/weld/sleef/sleef/build/lib",
-                env::var("WELD_HOME").unwrap(),
-            )
+                weld_home,
+            );
+            if ! Path::new(&path).exists() {
+                panic!("directory having bitcode does not exist");
+            }
+            path
         };
 
         pub static ref SLEEF_BITCODES: Vec<String> = {
